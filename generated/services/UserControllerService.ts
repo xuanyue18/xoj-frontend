@@ -137,7 +137,7 @@ id?: number,
      * @returns any Created
      * @throws ApiError
      */
-    public static listUserByPageUsingPost(
+    public static listUserByPageUsingPost1(
 userQueryRequest: UserQueryRequest,
 ): CancelablePromise<BaseResponse_Page_User_ | any> {
         return __request(OpenAPI, {
