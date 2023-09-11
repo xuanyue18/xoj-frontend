@@ -110,12 +110,6 @@ const title = ref("创建题目");
 // 如果页面地址包含 update，视为更新页面
 const updatePage = route.path.includes("update");
 
-router.afterEach(() => {
-  if (updatePage) {
-    title.value = "更新题目";
-  }
-});
-
 let form = ref({
   title: "",
   tags: [],
@@ -138,6 +132,9 @@ let form = ref({
  * 根据题目 id 获取老的数据
  */
 const loadData = async () => {
+  if (updatePage) {
+    title.value = "更新题目";
+  }
   const id = route.query.id;
   if (!id) {
     return;
