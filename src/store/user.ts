@@ -6,9 +6,7 @@ import { UserControllerService } from "../../generated";
 export default {
   namespaced: true,
   state: () => ({
-    loginUser: {
-      userName: "未登录",
-    },
+    loginUser: {},
   }),
   actions: {
     async getLoginUser({ commit, state }, payload) {
