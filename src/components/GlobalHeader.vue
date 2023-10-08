@@ -62,7 +62,7 @@
               <icon-import />
               立即登录
             </a-doption>
-            <a-doption @click="logout">
+            <a-doption @click="$router.push('user/register')">
               <icon-user-add />
               用户注册
             </a-doption>
