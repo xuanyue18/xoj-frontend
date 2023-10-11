@@ -1,6 +1,6 @@
 <template>
   <div id="basicLayout">
-    <a-layout style="height: 100vh">
+    <a-layout>
       <a-layout-header class="header">
         <global-header />
       </a-layout-header>
@@ -8,7 +8,7 @@
         <router-view />
       </a-layout-content>
       <a-layout-footer class="footer">
-        <a href="https://github.com/xuanyue18"
+        <a href="https://github.com/xuanyue18" style="text-decoration: none"
           >Xcode Online Judge by xuanyue18</a
         >
       </a-layout-footer>
@@ -18,22 +18,32 @@
 
 <style>
 #basicLayout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 #basicLayout .header {
+  box-shadow: #eee 0px 2px 5px;
   margin-bottom: 16px;
-  box-shadow: #eee 1px 1px 5px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 #basicLayout .content {
-  background: linear-gradient(to right, #fefefe, #fff);
-  margin-bottom: 16px;
-  padding: 20px;
+  flex: 1;
+  background-color: rgba(255, 255, 255, 0.9);
+  width: 95%;
+  padding: 15px;
+  margin: 0 auto;
+  border-radius: 8px;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+  //background: linear-gradient(to right, #fefefe, #fff); margin-bottom: 16px;
 }
 
 #basicLayout .footer {
-  background: #42b983;
-  padding: 16px;
+  padding: 12px;
   position: sticky;
   bottom: 0;
   left: 0;

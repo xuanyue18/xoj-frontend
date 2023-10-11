@@ -1,30 +1,32 @@
 <template>
   <a-row class="globalHeader" align="center" :wrap="false">
     <a-col flex="auto">
-      <div>
-        <a-menu
-          mode="horizontal"
-          :default-selected-keys="['1']"
-          @menu-item-click="doMenuClick"
-          v-model:selected-keys="selectedKeys"
+      <a-menu
+        mode="horizontal"
+        :default-selected-keys="['1']"
+        @menu-item-click="doMenuClick"
+        v-model:selected-keys="selectedKeys"
+        style="padding: 0"
+      >
+        <a-menu-item
+          key="0"
+          :style="{ padding: 0, marginRight: '38px' }"
+          disabled
         >
-          <a-menu-item
-            key="0"
-            :style="{ padding: 0, marginRight: '38px' }"
-            disabled
-          >
-            <div class="title-bar">
-              <img class="logo" src="../assets/xoj-logo.png" />
-              <div class="title">Xcode OJ</div>
-            </div>
-          </a-menu-item>
-          <a-menu-item v-for="item in visibleRoutes" :key="item.path">
-            {{ item.name }}
-          </a-menu-item>
-        </a-menu>
-      </div>
+          <div class="title-bar">
+            <img class="logo" src="../assets/xoj-logo.png" />
+            <div class="title">Xcode OJ</div>
+          </div>
+        </a-menu-item>
+        <a-menu-item v-for="item in visibleRoutes" :key="item.path">
+          {{ item.name }}
+        </a-menu-item>
+      </a-menu>
     </a-col>
-    <a-col flex="45px" style="margin-right: 30px">
+    <a-col
+      flex="45px"
+      style="padding: 15px 30px 15px 20px; background-color: #ffffff"
+    >
       <a-popover
         position="bottom"
         :showArrow="false"
@@ -324,15 +326,13 @@ const uploadAvatar = async () => {
 
 .title {
   color: #444;
-  margin-left: 16px;
+  margin-left: 14px;
+  font-family: "Helvetica Neue", sans-serif;
+  font-size: 15px;
+  color: #333;
 }
 
 .logo {
-  height: 48px;
-}
-
-.no-padding-margin {
-  padding: 0;
-  margin: 0;
+  height: 42px;
 }
 </style>
