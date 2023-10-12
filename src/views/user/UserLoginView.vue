@@ -90,6 +90,7 @@ const handleSubmit = async () => {
     const res = await UserControllerService.userLoginUsingPost(form);
     if (res.code == 0) {
       await store.dispatch("user/getLoginUser");
+      localStorage.setItem("token", res.data.token);
       message.success("登录成功!");
       //登录成功, 跳转到主页
       await router.push({

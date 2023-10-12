@@ -3,7 +3,12 @@ import axios from "axios";
 
 axios.interceptors.request.use(
   function (config) {
-    // Do something before request is sent
+    // 携带token发送请求
+    const token = localStorage.getItem("token");
+    console.log("token: ", token);
+    if (token) {
+      config.headers.Authorization = token;
+    }
     return config;
   },
   function (error) {
