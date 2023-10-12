@@ -33,7 +33,6 @@
 
 #basicLayout .content {
   flex: 1;
-  background-color: rgba(255, 255, 255, 0.9);
   width: 95%;
   padding: 15px;
   margin: 0 auto;
@@ -46,9 +45,16 @@
   padding: 12px;
   position: sticky;
   bottom: 0;
-  left: 0;
-  right: 0;
   text-align: center;
+}
+#basicLayout .footer a {
+  color: #035afd;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+#basicLayout .footer a:hover {
+  color: #003fd0;
 }
 </style>
 <script>

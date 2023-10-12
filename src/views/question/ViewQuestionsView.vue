@@ -1,7 +1,32 @@
 <template>
   <div id="viewQuestionsView">
-    <a-row :gutter="[24, 24]">
-      <a-col :md="12" :xs="24">
+    <a-split
+      :style="{
+        height: '80vh',
+        width: '100%',
+        minWidth: '500px',
+        // border: '1px solid var(--color-border)',
+        padding: 0,
+        margin: 0,
+      }"
+      min="0"
+      max="0.7"
+    >
+      <template #resize-trigger>
+        <div
+          class="resize-trigger"
+          style="
+            height: 100%;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+          "
+        >
+          <icon-more-vertical style="width: 10px" />
+        </div>
+      </template>
+
+      <template #first>
         <a-tabs default-active-key="question">
           <a-tab-pane key="question" title="题目">
             <a-card v-if="question" :title="question.title">
@@ -9,17 +34,32 @@
                 title="判题条件"
                 :column="{ xs: 1, md: 2, lg: 3 }"
               >
-                <a-descriptions-item label="时间限制">
+                <a-descriptions-item label="时间">
+                  <template #label
+                    >时间
+                    <icon-schedule />
+                  </template>
                   {{ question.judgeConfig.timeLimit ?? 0 }}
                 </a-descriptions-item>
-                <a-descriptions-item label="内存限制">
+                <a-descriptions-item label="内存">
+                  <template #label
+                    >内存
+                    <icon-storage />
+                  </template>
                   {{ question.judgeConfig.memoryLimit ?? 0 }}
                 </a-descriptions-item>
-                <a-descriptions-item label="堆栈限制">
+                <a-descriptions-item label="堆栈">
+                  <template #label
+                    >堆栈
+                    <icon-layers />
+                  </template>
                   {{ question.judgeConfig.stackLimit ?? 0 }}
                 </a-descriptions-item>
               </a-descriptions>
-              <md-viewer :value="question.content || ''" />
+              <md-viewer
+                :value="question.content || ''"
+                style="min-height: 500px; height: 57vh"
+              />
               <template #extra>
                 <a-space wrap>
                   <a-tag
@@ -32,22 +72,33 @@
               </template>
             </a-card>
           </a-tab-pane>
-          <a-tab-pane key="comment" title="评论" disabled> 评论区</a-tab-pane>
-          <a-tab-pane key="answer" title="答案"> 暂时无法查看答案</a-tab-pane>
+          <a-tab-pane key="comment" title="评论" disabled>评论区</a-tab-pane>
+          <a-tab-pane key="answer" title="答案">
+            <a-card>
+              <md-viewer
+                :value="'提交之后即可查看答案'"
+                style="min-height: 500px; height: calc(70vh - 7px)"
+              />
+            </a-card>
+          </a-tab-pane>
         </a-tabs>
-      </a-col>
-      <a-col :md="12" :xs="24">
+      </template>
+      <template #second>
         <a-form :model="form" layout="inline">
-          <a-form-item field="title" label="编程语言" style="min-width: 240px">
+          <a-form-item
+            field="title"
+            label="编程语言"
+            style="min-width: 100px; margin-bottom: 26px"
+          >
             <a-select
               v-model="form.language"
               :style="{ width: '320px' }"
               placeholder="选择编程语言"
             >
               <a-option>java</a-option>
-              <a-option>cpp</a-option>
-              <a-option>go</a-option>
-              <a-option>html</a-option>
+              <a-option disabled>cpp</a-option>
+              <a-option disabled>go</a-option>
+              <a-option disabled>暂支持Java</a-option>
             </a-select>
           </a-form-item>
         </a-form>
@@ -56,10 +107,11 @@
           :language="form.language"
           :handle-change="changeCode"
         />
-        <a-divider size="0" />
-        <a-button type="primary" @click="doSubmit">提交代码</a-button>
-      </a-col>
-    </a-row>
+        <a-card style="margin-top: 13px" size="small">
+          <a-button type="primary" @click="doSubmit">提交代码</a-button>
+        </a-card>
+      </template>
+    </a-split>
   </div>
 </template>
 
@@ -96,9 +148,22 @@ const loadData = async () => {
   }
 };
 
+/**
+ * 不同语言的默认程序
+ */
+const codeDefaultValue = ref(
+  "public class Main {\n" +
+    "    public static void main(String[] args) {\n" +
+    "        int a = Integer.parseInt(args[0]);\n" +
+    "        int b = Integer.parseInt(args[1]);\n" +
+    "        System.out.println(a + b);\n" +
+    "    }\n" +
+    "}\n"
+);
+
 const form = ref<QuestionSubmitAddRequest>({
   language: "java",
-  code: "",
+  code: codeDefaultValue as unknown as string,
 });
 
 /**
@@ -133,11 +198,14 @@ const changeCode = (value: string) => {
 
 <style>
 #viewQuestionsView {
-  max-width: 1500px;
-  margin: 0 auto;
+  width: 100%;
 }
 
 #viewQuestionsView .arco-space-horizontal .arco-space-item {
   margin-bottom: 0 !important;
+}
+
+.resize-trigger:hover {
+  background-color: #0078fd; /* 悬浮时的背景颜色 */
 }
 </style>
