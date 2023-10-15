@@ -133,6 +133,17 @@
             </a-button>
           </div>
         </a-form-item>
+        <a-form-item label="难度">
+          <a-select
+            v-model="form.difficulty"
+            :style="{ width: '170px' }"
+            placeholder="选择难度(默认简单)"
+          >
+            <a-option :value="0">简单</a-option>
+            <a-option :value="1">中等</a-option>
+            <a-option :value="2">困难</a-option>
+          </a-select>
+        </a-form-item>
         <div style="margin-top: 15px" />
         <a-form-item>
           <a-button type="primary" style="min-width: 200px" @click="doSubmit"
@@ -156,7 +167,7 @@ const router = useRouter();
 // 如果页面地址包含 update，视为更新页面
 const updatePage = route.path.includes("update");
 const formRef = ref();
-let form = ref({
+const form = ref({
   title: "",
   tags: [],
   answer: "",
@@ -172,6 +183,7 @@ let form = ref({
       output: "",
     },
   ],
+  difficulty: [],
 });
 
 /**

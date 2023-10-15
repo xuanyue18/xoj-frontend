@@ -1,5 +1,44 @@
 <template>
   <div id="manageQuestionView">
+    <a-row justify="space-between">
+      <a-col flex="auto">
+        <a-form :model="searchParams" layout="inline">
+          <a-form-item field="tags" label="标签:" style="min-width: 300px">
+            <a-input-tag v-model="searchParams.tags" placeholder="请选择标签" />
+          </a-form-item>
+          <a-form-item label="难度:">
+            <a-select
+              v-model="searchParams.difficulty"
+              :style="{ width: '130px' }"
+              placeholder="选择难度"
+              allow-clear
+            >
+              <a-option :value="0">简单</a-option>
+              <a-option :value="1">中等</a-option>
+              <a-option :value="2">困难</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item>
+            <a-input-search
+              v-model="searchParams.keyword"
+              :style="{ width: '320px' }"
+              @click="doSubmit"
+              placeholder="请输入搜索关键词"
+              search-button
+            />
+          </a-form-item>
+        </a-form>
+      </a-col>
+      <a-col flex="80px">
+        <a-button type="outline" @click="$router.push('/add/question')">
+          <template #icon>
+            <icon-plus />
+          </template>
+          新增题目
+        </a-button>
+      </a-col>
+    </a-row>
+
     <a-table
       :ref="tableRef"
       :columns="columns"
@@ -10,8 +49,71 @@
         current: searchParams.current,
         total,
       }"
+      :scroll="{ x: '100%', y: '100%' }"
+      :scrollbar="true"
+      column-resizable
       @page-change="onPageChange"
     >
+      <template #difficulty="{ record }">
+        <a-tag v-if="record.difficulty === 0" color="cyan">简单</a-tag>
+        <a-tag v-if="record.difficulty === 1" color="orange">中等</a-tag>
+        <a-tag v-if="record.difficulty === 2" color="red">困难</a-tag>
+      </template>
+      <template #judgeConfig="{ record }">
+        <a-space>
+          <a-tag :size="'small'" style="min-width: 80px">
+            <template #icon>
+              <icon-schedule />
+            </template>
+            {{ JSON.parse(record.judgeConfig).timeLimit }}ms
+          </a-tag>
+          <a-tag :size="'small'" style="min-width: 80px">
+            <template #icon>
+              <icon-storage />
+            </template>
+            {{ JSON.parse(record.judgeConfig).memoryLimit }}MB
+          </a-tag>
+          <a-tag :size="'small'" style="min-width: 80px">
+            <template #icon>
+              <icon-layers />
+            </template>
+            {{ JSON.parse(record.judgeConfig).stackLimit }}MB
+          </a-tag>
+        </a-space>
+      </template>
+      <template #judgeCase="{ record }">
+        <a-space wrap>
+          <a-tag
+            v-for="(config, index) of JSON.parse(record.judgeCase)"
+            :key="index"
+            color="blue"
+          >
+            in: {{ config.input }} out:
+            {{ config.output }}
+          </a-tag>
+        </a-space>
+      </template>
+      <template #tags="{ record }">
+        <a-space wrap>
+          <a-tag
+            v-for="(tag, index) of JSON.parse(record.tags)"
+            :key="index"
+            color="green"
+          >
+            {{ tag }}
+          </a-tag>
+        </a-space>
+      </template>
+      <template #acceptedRate="{ record }">
+        {{
+          `${
+            record.submitNum ? record.acceptedNum / record.submitNum : "0"
+          }% (${record.acceptedNum}/${record.submitNum})`
+        }}
+      </template>
+      <template #createTime="{ record }"
+        >{{ moment(record.createTime).format("YYYY-MM-DD HH:mm:ss") }}
+      </template>
       <template #optional="{ record }">
         <a-space>
           <a-button type="primary" @click="doUpdate(record)"> 修改</a-button>
@@ -24,20 +126,34 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watchEffect } from "vue";
-import { Question, QuestionControllerService } from "../../../generated";
+import {
+  Question,
+  QuestionControllerService,
+  QuestionQueryRequest,
+} from "../../../generated";
 import message from "@arco-design/web-vue/es/message";
 import { useRouter } from "vue-router";
+import moment from "moment/moment";
 
 const tableRef = ref();
 
 const dataList = ref([]);
 const total = ref(0);
-const searchParams = ref({
+const searchParams = ref<QuestionQueryRequest>({
+  title: undefined,
+  keyword: undefined,
+  difficulty: undefined,
+  tags: [],
   pageSize: 10,
   current: 1,
+  sortField: "createTime",
+  sortOrder: "descend",
 });
 
+const judgeConfig = ref();
+
 const loadData = async () => {
+  searchParams.value.difficulty;
   const res = await QuestionControllerService.listQuestionByPageUsingPost(
     searchParams.value
   );
@@ -54,6 +170,7 @@ const loadData = async () => {
  */
 watchEffect(() => {
   loadData();
+  console.log("监听到值发生了变化");
 });
 
 /**
@@ -67,52 +184,53 @@ onMounted(() => {
 
 const columns = [
   {
-    title: "id",
-    dataIndex: "id",
-  },
-  {
-    title: "标题",
+    title: "题目",
     dataIndex: "title",
+    width: 150,
+    align: "center",
   },
   {
-    title: "内容",
-    dataIndex: "content",
+    title: "难度",
+    slotName: "difficulty",
+    width: 80,
+    align: "center",
   },
   {
     title: "标签",
-    dataIndex: "tags",
-  },
-  {
-    title: "答案",
-    dataIndex: "answer",
-  },
-  {
-    title: "提交数",
-    dataIndex: "submitNum",
-  },
-  {
-    title: "通过数",
-    dataIndex: "acceptedNum",
+    slotName: "tags",
+    width: 280,
+    align: "center",
   },
   {
     title: "判题配置",
-    dataIndex: "judgeConfig",
+    slotName: "judgeConfig",
+    width: 280,
+    align: "center",
   },
   {
     title: "判题用例",
-    dataIndex: "judgeCase",
+    slotName: "judgeCase",
+    width: 300,
+    align: "center",
   },
   {
-    title: "用户id",
-    dataIndex: "userId",
+    title: "通过率",
+    slotName: "acceptedRate",
+    width: 120,
+    align: "center",
   },
   {
     title: "创建时间",
-    dataIndex: "createTime",
+    slotName: "createTime",
+    width: 180,
+    align: "center",
   },
   {
     title: "操作",
     slotName: "optional",
+    width: 200,
+    align: "center",
+    fixed: "right",
   },
 ];
 
@@ -144,6 +262,17 @@ const doUpdate = (question: Question) => {
       id: question.id,
     },
   });
+};
+
+/**
+ * 确认搜素, 更新加载数据
+ */
+const doSubmit = () => {
+  // 这里需要重置搜索页号
+  searchParams.value = {
+    ...searchParams.value,
+    current: 1,
+  };
 };
 </script>
 

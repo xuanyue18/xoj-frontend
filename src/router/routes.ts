@@ -62,6 +62,7 @@ export const routes: Array<RouteRecordRaw> = [
     component: AddQuestionView,
     meta: {
       access: ACCESS_ENUM.USER,
+      hideInMenu: true,
     },
   },
   {

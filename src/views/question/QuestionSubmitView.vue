@@ -13,7 +13,6 @@
           <a-option>java</a-option>
           <a-option>cpp</a-option>
           <a-option>go</a-option>
-          <a-option>html</a-option>
         </a-select>
       </a-form-item>
       <a-form-item>
@@ -33,6 +32,13 @@
       }"
       @page-change="onPageChange"
     >
+      <template #status="{ record }">
+        <!--        判题状态（0 - 待判题、1 - 判题中、2 - 成功、3 - 失败）-->
+        <a-tag v-if="record.status === 0" color="cyan">待判题</a-tag>
+        <a-tag v-if="record.status === 1" color="blue">判题中</a-tag>
+        <a-tag v-if="record.status === 2" color="green">成功</a-tag>
+        <a-tag v-if="record.status === 3" color="red">失败</a-tag>
+      </template>
       <template #judgeInfo="{ record }">
         {{ JSON.stringify(record.judgeInfo) }}
       </template>
@@ -58,8 +64,6 @@ const loadData = async () => {
   const res = await QuestionControllerService.listQuestionSubmitByPageUsingPost(
     {
       ...searchParams.value,
-      sortField: "createTime",
-      sortOrder: "descend",
     }
   );
   if (res.code === 0) {
@@ -79,13 +83,8 @@ const searchParams = ref<QuestionSubmitQueryRequest>({
   language: undefined,
   pageSize: 10,
   current: 1,
-});
-
-/**
- * 监听searchParams变量, 改变时触发页面的重新加载
- */
-watchEffect(() => {
-  loadData();
+  sortField: "createTime",
+  sortOrder: "descend",
 });
 
 /**
@@ -95,36 +94,53 @@ onMounted(() => {
   loadData();
 });
 
+/**
+ * 监听searchParams变量, 改变时触发页面的重新加载(首次加载时会触发导致发送两次请求)
+ */
+watchEffect(
+  () => {
+    loadData();
+  }
+  // { flush: "post" }
+);
+
 // {id: "1", title: "A+ D", content: "新的题目内容", tags: "["二叉树"]", answer: "新的答案", submitNum: 0,…}
 
 const columns = [
   {
+    title: "判题状态",
+    slotName: "status",
+    align: "center",
+  },
+  {
     title: "提交号",
     dataIndex: "id",
+    align: "center",
   },
   {
     title: "编程语言",
     dataIndex: "language",
+    align: "center",
   },
   {
     title: "判题信息",
     slotName: "judgeInfo",
-  },
-  {
-    title: "判题状态",
-    dataIndex: "status",
+    align: "center",
   },
   {
     title: "题目 id",
     dataIndex: "questionId",
+    align: "center",
   },
   {
     title: "提交者 id",
     dataIndex: "userId",
+    align: "center",
   },
   {
     title: "创建时间",
     slotName: "createTime",
+    align: "center",
   },
 ];
 
