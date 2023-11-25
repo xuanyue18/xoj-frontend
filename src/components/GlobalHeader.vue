@@ -25,7 +25,7 @@
     </a-col>
     <a-col
       flex="45px"
-      style="padding: 15px 30px 15px 20px; background-color: #ffffff"
+      style="padding: 15px 40px 15px 20px; background-color: #ffffff"
     >
       <a-popover
         position="bottom"
@@ -39,10 +39,13 @@
             <a-avatar shape="circle" :image-url="loginUser.userAvatar">
             </a-avatar>
           </template>
-          <template v-else>
+          <template v-else-if="loginUser.userName">
             <a-avatar :style="{ backgroundColor: '#14a9f8' }"
               >{{ loginUser.userName?.charAt(0).toUpperCase() }}
             </a-avatar>
+          </template>
+          <template v-else>
+            <icon-user :size="30" />
           </template>
         </template>
         <template v-else>
@@ -92,12 +95,16 @@
         :custom-request="uploadAvatar"
       >
         <template #upload-button>
-          <div
-            class="arco-upload-list-picture custom-upload-avatar"
-            v-if="updateForm.userAvatar"
-          >
+          <div class="arco-upload-list-picture custom-upload-avatar">
             <a-avatar trigger-type="mask" :size="75" auto-fix-font-size>
-              <img alt="avatar" :src="updateForm.userAvatar" />
+              <img
+                alt="avatar"
+                :src="
+                  updateForm.userAvatar
+                    ? updateForm.userAvatar
+                    : 'https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/24e0dd27418d2291b65db1b21aa62254.png~tplv-uwbnlip3yd-webp.webp'
+                "
+              />
               <template #trigger-icon>
                 <IconEdit />
               </template>
@@ -132,12 +139,12 @@
   </a-drawer>
 
   <a-modal
-    v-model:visible="visiblePassword"
+    :visible="visiblePassword"
     title="修改密码"
-    @ok="handleOk"
+    @ok="changePassword"
     @cancel="handlePasswordCancel"
   >
-    <a-form ref="passwordFormRef" :model="updateForm">
+    <a-form ref="passwordFormRef" :model="passwordForm">
       <a-form-item
         field="oldUserPassword"
         label="原密码: "
@@ -145,9 +152,8 @@
           { required: true, message: '请输入原密码' },
           { minLength: 8, message: '密码不小于8位' },
         ]"
-        :validate-trigger="['change', 'input', 'focus']"
       >
-        <a-input-password v-model="updateForm.oldUserPassword" />
+        <a-input-password v-model="passwordForm.oldUserPassword" />
       </a-form-item>
       <a-form-item
         field="userPassword"
@@ -156,20 +162,18 @@
           { required: true, message: '请输入新密码' },
           { minLength: 8, message: '密码不小于8位' },
         ]"
-        :validate-trigger="['change', 'input', 'focus']"
       >
-        <a-input-password v-model="updateForm.userPassword" />
+        <a-input-password v-model="passwordForm.userPassword" />
       </a-form-item>
       <a-form-item
-        field="checkedPassword"
+        field="checkPassword"
         label="确认密码: "
         :rules="[
-          { required: true, message: '请输入确认密码' },
-          { minLength: 8, message: '密码不小于8位' },
+          { required: true, message: '确认密码不能为空' },
+          { validator: isEqual, message: '与输入的密码不一致' },
         ]"
-        :validate-trigger="['change', 'input', 'focus']"
       >
-        <a-input-password v-model="updateForm.checkPassword" />
+        <a-input-password v-model="passwordForm.checkPassword" />
       </a-form-item>
     </a-form>
   </a-modal>
@@ -199,12 +203,15 @@ const updateForm = ref<UserUpdateMyRequest>({
   userName: "",
   userAvatar: "",
   userProfile: "",
+});
+
+const passwordForm = ref<UserUpdateMyRequest>({
   userPassword: "",
   oldUserPassword: "",
   checkPassword: "",
 });
-const passwordFormRef = ref();
 
+const passwordFormRef = ref();
 const visibleUser = ref(false);
 const visiblePassword = ref(false);
 const file = ref();
@@ -244,6 +251,7 @@ const doMenuClick = (key: string) => {
     path: key,
   });
 };
+
 // setTimeout(() => {
 //   store.dispatch("user/getLoginUser", {
 //     userName: "wzewei",
@@ -261,33 +269,38 @@ const logout = () => {
 const handleClick = () => {
   visibleUser.value = true;
 };
-const handleOk = async () => {
-  // todo 修改密码表单校验需要写一下, 区分修改密码还是修改信息
-  if (updateForm.value?.userPassword !== updateForm.value?.checkPassword) {
-    Message.error("新密码和确认密码不一致");
-    return;
-  }
-  const res = await UserControllerService.updateMyUserUsingPost({
-    ...updateForm.value,
-  });
-  if (updateForm.value?.userPassword != null) {
-    await router.push("/user/login");
-    Message.success("密码修改成功！");
-  } else {
-    if (res.code === 0) {
-      Message.success("个人信息更新成功！");
-      visibleUser.value = false;
-      location.reload();
-    } else {
-      Message.error("更新失败！", res.msg);
-    }
-  }
-};
 const handleCancel = () => {
   visibleUser.value = false;
 };
+const handleOk = async () => {
+  const res = await UserControllerService.updateMyUserUsingPost({
+    ...updateForm.value,
+  });
+  if (res.code === 0) {
+    Message.success("个人信息更新成功！");
+    visibleUser.value = false;
+    location.reload();
+  } else {
+    Message.error("更新失败！", res.msg);
+  }
+};
 
 // 修改密码
+const changePassword = async () => {
+  const validate_res = await passwordFormRef.value?.validate();
+  console.log(validate_res);
+  if (!validate_res) {
+    const res = await UserControllerService.updateMyUserUsingPost({
+      ...passwordForm.value,
+    });
+    if (res.code === 0) {
+      await router.push("/user/login");
+      Message.success("密码修改成功！");
+    } else {
+      Message.error("更新失败, " + res.message);
+    }
+  }
+};
 const handlePasswordClick = () => {
   visiblePassword.value = true;
 };
@@ -295,13 +308,20 @@ const handlePasswordCancel = () => {
   passwordFormRef.value.resetFields();
   visiblePassword.value = false;
 };
+const isEqual = (value: string, cb: (arg0: string) => void) => {
+  return new Promise<void>((resolve) => {
+    if (value !== passwordForm.value.userPassword) {
+      cb("密码不一致");
+    }
+    resolve();
+  });
+};
 
 // 头像上传
 const onChange = async (_: never, currentFile: FileItem) => {
   file.value = {
     ...currentFile,
   };
-  console.log(file);
 };
 const uploadAvatar = async () => {
   const res = await FileControllerService.uploadOssFileUsingPost(

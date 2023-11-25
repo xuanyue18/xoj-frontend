@@ -2,13 +2,15 @@ import { RouteRecordRaw } from "vue-router";
 import UserLayout from "@/layouts/UserLayout.vue";
 import UserLoginView from "@/views/user/UserLoginView.vue";
 import UserRegisterView from "@/views/user/UserRegisterView.vue";
-import NoAuthView from "@/views/NoAuthView.vue";
+import NoAuthView from "@/views/error/NoAuthView.vue";
 import ACCESS_ENUM from "@/access/accessEnum";
 import AddQuestionView from "@/views/question/AddQuestionView.vue";
 import ManageQuestionView from "@/views/question/ManageQuestionView.vue";
 import QuestionsView from "@/views/question/QuestionsView.vue";
 import QuestionSubmitView from "@/views/question/QuestionSubmitView.vue";
 import ViewQuestionsView from "@/views/question/ViewQuestionsView.vue";
+import AboutView from "@/views/AboutView.vue";
+import NoFound from "@/views/error/NoFoundView.vue";
 
 export const routes: Array<RouteRecordRaw> = [
   {
@@ -38,7 +40,7 @@ export const routes: Array<RouteRecordRaw> = [
   },
   {
     path: "/questions",
-    name: "浏览题目",
+    name: "题库",
     component: QuestionsView,
   },
   {
@@ -82,7 +84,11 @@ export const routes: Array<RouteRecordRaw> = [
       access: ACCESS_ENUM.ADMIN,
     },
   },
-
+  {
+    path: "/about",
+    name: "关于XOJ",
+    component: AboutView,
+  },
   // {
   //   path: "/hide",
   //   name: "隐藏页面",
@@ -99,6 +105,18 @@ export const routes: Array<RouteRecordRaw> = [
       hideInMenu: true,
     },
   },
+  {
+    path: "/404",
+    name: "404",
+    component: NoFound,
+    meta: {
+      hideInMenu: true,
+    },
+  },
+  {
+    path: "/:pathMatch(.*)", // 匹配所有路由
+    redirect: "/404",
+  },
   // {
   //   path: "/admin",
   //   name: "管理员可见",
@@ -106,14 +124,5 @@ export const routes: Array<RouteRecordRaw> = [
   //   meta: {
   //     access: ACCESS_ENUM.ADMIN,
   //   },
-  // },
-  // {
-  //   path: "/about",
-  //   name: "关于我",
-  //   // route level code-splitting
-  //   // this generates a separate chunk (about.[hash].js) for this route
-  //   // which is lazy-loaded when the route is visited.
-  //   component: () =>
-  //     import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
   // },
 ];

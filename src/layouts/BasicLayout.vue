@@ -20,7 +20,7 @@
 #basicLayout {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
 }
 
 #basicLayout .header {
@@ -32,20 +32,19 @@
 }
 
 #basicLayout .content {
-  flex: 1;
   width: 95%;
+  height: 90%;
   padding: 15px;
   margin: 0 auto;
   border-radius: 8px;
   box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
-  //background: linear-gradient(to right, #fefefe, #fff); margin-bottom: 16px;
 }
 
 #basicLayout .footer {
   padding: 12px;
-  position: sticky;
-  bottom: 0;
   text-align: center;
+  //position: sticky;
+  //bottom: 0;
 }
 #basicLayout .footer a {
   color: #035afd;

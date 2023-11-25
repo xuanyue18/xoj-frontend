@@ -1,9 +1,9 @@
 <template>
-  <div id="questionSubmitView">
+  <div id="questionSubmitSingleView">
     <a-row justify="space-between">
       <a-col flex="auto">
         <a-form :model="searchParams" layout="inline">
-          <a-form-item label="状态:">
+          <a-form-item label="状态: ">
             <a-select
               v-model="searchParams.status"
               :style="{ width: '150px' }"
@@ -16,27 +16,16 @@
               <a-option :value="3">失败</a-option>
             </a-select>
           </a-form-item>
-          <a-form-item label="语言:">
+          <a-form-item label="语言">
             <a-select
               v-model="searchParams.language"
               :style="{ width: '150px' }"
-              placeholder="编程语言"
-              allow-clear
+              placeholder="选择编程语言"
             >
               <a-option>java</a-option>
               <a-option>cpp</a-option>
               <a-option>go</a-option>
             </a-select>
-          </a-form-item>
-          <a-form-item>
-            <a-input-search
-              v-model="searchParams.questionId"
-              :style="{ width: '320px' }"
-              @click="doSubmit"
-              placeholder="请输入题号"
-              search-button
-              allow-clear
-            />
           </a-form-item>
         </a-form>
       </a-col>
@@ -52,12 +41,10 @@
         </a-button>
       </a-col>
     </a-row>
-    <a-divider size="0" />
     <a-table
       :ref="tableRef"
       :columns="columns"
       :data="dataList"
-      table-layout-fixed="true"
       :pagination="{
         showTotal: true,
         pageSize: searchParams.pageSize,
@@ -66,16 +53,6 @@
       }"
       @page-change="onPageChange"
     >
-      <template #questionTitle="{ record }">
-        <a-link
-          v-if="record.questionTitle != ''"
-          status="success"
-          style="color: blue"
-          @click="toQuestionPage(record)"
-          >{{ record.questionTitle }}
-        </a-link>
-        <a-typography-text v-else disabled>题目不存在</a-typography-text>
-      </template>
       <template #status="{ record }">
         <!--        判题状态（0 - 待判题、1 - 判题中、2 - 成功、3 - 失败）-->
         <a-tag v-if="record.status === 0" color="cyan">待判题</a-tag>
@@ -83,30 +60,31 @@
         <a-tag v-if="record.status === 2" color="green">成功</a-tag>
         <a-tag v-if="record.status === 3" color="red">失败</a-tag>
       </template>
-      <template #judgeInfo="{ record }">
-        {{ JSON.stringify(record.judgeInfo) }}
+      <template #runtime="{ record }">
+        <span v-if="record.judgeInfo.time">
+          {{ record.judgeInfo.time }}ms
+        </span>
+        <span v-else> N/A </span>
+      </template>
+      <template #memory="{ record }">
+        {{ record.judgeInfo.memory ?? "N/A" }}
       </template>
       <template #createTime="{ record }"
         >{{ moment(record.createTime).format("YYYY-MM-DD HH:mm:ss") }}
       </template>
       <template #optional="{ record }">
-        <a-button type="primary" @click="handleClick(record)"
-          >查看代码
-        </a-button>
+        <a-space>
+          <a-button type="primary" @click="handleClick(record)">查看</a-button>
+        </a-space>
       </template>
     </a-table>
-    <a-modal v-model:visible="visible" width="60%" hide-cancel>
-      <template #title>{{ code.title }}</template>
-      <md-viewer
-        :value="'```' + code.language + '\n' + code.content + '```' || ''"
-      />
-    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref, watchEffect } from "vue";
+import { defineProps, onMounted, ref, watchEffect, defineEmits } from "vue";
 import {
+  Question,
   QuestionControllerService,
   QuestionSubmitQueryRequest,
   QuestionSubmitVO,
@@ -114,12 +92,14 @@ import {
 import message from "@arco-design/web-vue/es/message";
 import { useRouter } from "vue-router";
 import moment from "moment";
-import MdViewer from "@/components/MdViewer.vue";
+
+const props = defineProps(["questionId", "userId"]);
 
 const loadData = async () => {
   const res = await QuestionControllerService.listQuestionSubmitByPageUsingPost(
     {
       ...searchParams.value,
+      questionId: props.questionId,
     }
   );
   if (res.code === 0) {
@@ -133,11 +113,17 @@ const loadData = async () => {
 const tableRef = ref();
 const dataList = ref([]);
 const total = ref(0);
-const code = reactive({
-  title: "",
-  content: "",
-  language: "",
+
+const searchParams = ref<QuestionSubmitQueryRequest>({
+  questionId: undefined,
+  language: undefined,
+  pageSize: 10,
+  current: 1,
+  sortField: "createTime",
+  sortOrder: "descend",
+  userId: props.userId,
 });
+
 const loading = ref(false);
 
 /**
@@ -149,15 +135,6 @@ const doRefresh = () => {
   loading.value = !loading.value;
 };
 
-const searchParams = ref<QuestionSubmitQueryRequest>({
-  questionId: undefined,
-  language: undefined,
-  pageSize: 12,
-  current: 1,
-  sortField: "createTime",
-  sortOrder: "descend",
-});
-
 /**
  * 页面加载时，请求数据
  */
@@ -168,9 +145,14 @@ onMounted(() => {
 /**
  * 监听searchParams变量, 改变时触发页面的重新加载(首次加载时会触发导致发送两次请求)
  */
-watchEffect(() => {
-  loadData();
-});
+watchEffect(
+  () => {
+    loadData();
+  }
+  // { flush: "post" }
+);
+
+// {id: "1", title: "A+ D", content: "新的题目内容", tags: "["二叉树"]", answer: "新的答案", submitNum: 0,…}
 
 const columns = [
   {
@@ -179,36 +161,27 @@ const columns = [
     align: "center",
   },
   {
-    title: "题目",
-    slotName: "questionTitle",
-    align: "center",
-  },
-  {
-    title: "判题信息",
-    slotName: "judgeInfo",
-    align: "center",
-    ellipsis: true,
-    tooltip: true,
-  },
-  {
-    title: "编程语言",
+    title: "语言",
     dataIndex: "language",
     align: "center",
   },
   {
-    title: "提交者",
-    dataIndex: "userVO.userName",
+    title: "执行用时",
+    slotName: "runtime",
+    align: "center",
+  },
+  {
+    title: "消耗内存",
+    slotName: "memory",
     align: "center",
   },
   {
     title: "提交时间",
     slotName: "createTime",
     align: "center",
-    sortable: {
-      sortDirections: ["ascend", "descend"],
-    },
   },
   {
+    title: "操作",
     slotName: "optional",
     align: "center",
   },
@@ -225,12 +198,24 @@ const router = useRouter();
 
 /**
  * 跳转到做题页面
- * @param questionSubmit
+ * @param question
  */
-const toQuestionPage = (questionSubmit: QuestionSubmitVO) => {
+const toQuestionPage = (question: Question) => {
   router.push({
-    path: `/view/question/${questionSubmit.questionId}`,
+    path: `/view/question/${question.id}`,
   });
+};
+
+const showCard = ref(false);
+const id = ref();
+
+const emit = defineEmits<{
+  change: [showcard: boolean, path: string]; // 具名元组语法
+}>();
+const handleClick = (question_submit: QuestionSubmitVO) => {
+  showCard.value = !showCard.value;
+  id.value = question_submit.id;
+  emit("change", showCard.value, id.value);
 };
 
 /**
@@ -243,31 +228,10 @@ const doSubmit = () => {
     current: 1,
   };
 };
-
-const visible = ref(false);
-/**
- * 查看代码
- * @param record
- */
-const handleClick = (record: {
-  questionTitle: string;
-  code: string;
-  language: string;
-}) => {
-  code.title = record.questionTitle;
-  code.content = record.code;
-  code.language = record.language;
-  visible.value = true;
-};
 </script>
 
 <style scoped>
-#questionSubmitView {
-  max-width: 95%;
+#questionSubmitSingleView {
   margin: 0 auto;
-}
-
-.demo {
-  width: 600px;
 }
 </style>

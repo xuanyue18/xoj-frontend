@@ -64,7 +64,7 @@
             <a-form-item
               field="judgeConfig.memoryLimit"
               label="内存"
-              tooltip="单位: kb"
+              tooltip="单位: MB"
             >
               <a-input-number
                 v-model="form.judgeConfig.memoryLimit"
@@ -77,7 +77,7 @@
             <a-form-item
               field="judgeConfig.stackLimit"
               label="堆栈"
-              tooltip="单位: kb"
+              tooltip="单位: MB"
             >
               <a-input-number
                 v-model="form.judgeConfig.stackLimit"
@@ -173,8 +173,8 @@ const form = ref({
   answer: "",
   content: "",
   judgeConfig: {
-    memoryLimit: 1000,
-    stackLimit: 1000,
+    memoryLimit: 150,
+    stackLimit: 150,
     timeLimit: 1000,
   },
   judgeCase: [
@@ -212,8 +212,8 @@ const loadData = async () => {
     }
     if (!form.value.judgeConfig) {
       form.value.judgeConfig = {
-        memoryLimit: 1000,
-        stackLimit: 1000,
+        memoryLimit: 150,
+        stackLimit: 150,
         timeLimit: 1000,
       };
     } else {
@@ -259,6 +259,7 @@ const doSubmit = async () => {
     }
   }
 };
+
 /**
  * 新增判题用例
  */

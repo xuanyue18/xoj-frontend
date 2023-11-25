@@ -15,29 +15,10 @@
 </style>
 <script setup lang="ts">
 import BasicLayout from "@/layouts/BasicLayout";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { onMounted } from "vue";
 
 const route = useRoute();
-// 解决屏幕收缩报错
-const debounce = (callback: (...args: any[]) => void, delay: number) => {
-  let tid: any;
-  return function (...args: any[]) {
-    const ctx = self;
-    tid && clearTimeout(tid);
-    tid = setTimeout(() => {
-      callback.apply(ctx, args);
-    }, delay);
-  };
-};
-
-const _ = (window as any).ResizeObserver;
-(window as any).ResizeObserver = class ResizeObserver extends _ {
-  constructor(callback: (...args: any[]) => void) {
-    callback = debounce(callback, 20);
-    super(callback);
-  }
-};
 
 /**
  * 全局初始化函数，有全局单次调用的代码，都可以写到这里

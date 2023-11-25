@@ -48,14 +48,13 @@
           </template>
         </a-input-password>
       </a-form-item>
-      <!--suppress TypeScriptValidateTypes -->
       <a-form-item
         field="checkPassword"
         help="与密码保持一致"
         :rules="[
           { required: true, message: '确认密码不能为空' },
           { minLength: 8, message: '确认密码小于8位' },
-          { match: form.userPassword, message: '与输入的密码不一致' },
+          { validator: isEqual, message: '与输入的密码不一致' },
         ]"
         hide-asterisk="true"
       >
@@ -124,6 +123,15 @@ const handleSubmit = async () => {
       message.error("注册失败, " + res.message);
     }
   }
+};
+
+const isEqual = (value: string, cb: (arg0: string) => void) => {
+  return new Promise<void>((resolve) => {
+    if (value !== form.userPassword) {
+      cb("密码不一致");
+    }
+    resolve();
+  });
 };
 </script>
 <style scoped>

@@ -1,14 +1,30 @@
 <template>
   <div id="questionsView">
     <a-form :model="searchParams" layout="inline">
-      <a-form-item field="title" label="名称" style="min-width: 240px">
-        <a-input v-model="searchParams.title" placeholder="请输入名称" />
+      <a-form-item label="难度" style="width: 240px">
+        <a-select
+          v-model="searchParams.difficulty"
+          placeholder="选择难度"
+          allow-clear
+        >
+          <a-option :value="0">简单</a-option>
+          <a-option :value="1">中等</a-option>
+          <a-option :value="2">困难</a-option>
+        </a-select>
       </a-form-item>
-      <a-form-item field="tags" label="标签" style="min-width: 240px">
+      <a-form-item field="tags" label="标签" style="width: 240px">
         <a-input-tag v-model="searchParams.tags" placeholder="请选择标签" />
       </a-form-item>
       <a-form-item>
-        <a-button type="primary" @click="doSubmit">搜索</a-button>
+        <a-input-search
+          v-model="searchParams.title"
+          :style="{ width: '320px' }"
+          @change="doSubmit"
+          @click="doSubmit"
+          placeholder="请输入题目名称"
+          search-button
+          allow-clear
+        />
       </a-form-item>
     </a-form>
     <a-divider size="0" />
@@ -31,13 +47,21 @@
           </a-tag>
         </a-space>
       </template>
+      <template #difficulty="{ record }">
+        <a-tag v-if="record.difficulty === 0" color="cyan">简单</a-tag>
+        <a-tag v-if="record.difficulty === 1" color="orange">中等</a-tag>
+        <a-tag v-if="record.difficulty === 2" color="red">困难</a-tag>
+      </template>
       <template #acceptedRate="{ record }">
         {{
           `${
-            record.submitNum ? record.acceptedNum / record.submitNum : "0"
+            record.submitNum
+              ? ((record.acceptedNum / record.submitNum) * 100).toFixed(2)
+              : "0.00"
           }% (${record.acceptedNum}/${record.submitNum})`
         }}
       </template>
+
       <template #createTime="{ record }"
         >{{ moment(record.createTime).format("YYYY-MM-DD") }}
       </template>
@@ -70,11 +94,15 @@ const total = ref(0);
 const searchParams = ref<QuestionQueryRequest>({
   title: "",
   tags: [],
-  pageSize: 10,
+  difficulty: undefined,
+  pageSize: 12,
   current: 1,
+  sortField: "createTime",
+  sortOrder: "descend",
 });
 
 const loadData = async () => {
+  searchParams.value.difficulty;
   const res = await QuestionControllerService.listQuestionVoByPageUsingPost(
     searchParams.value
   );
@@ -100,33 +128,45 @@ onMounted(() => {
   loadData();
 });
 
-// {id: "1", title: "A+ D", content: "新的题目内容", tags: "["二叉树"]", answer: "新的答案", submitNum: 0,…}
-
 const columns = [
   {
     title: "题号",
     dataIndex: "id",
+    align: "center",
   },
   {
-    title: "题目名称",
+    title: "题目",
     dataIndex: "title",
+    align: "center",
   },
 
   {
     title: "标签",
     slotName: "tags",
+    align: "center",
   },
 
   {
     title: "通过率",
     slotName: "acceptedRate",
+    align: "center",
+  },
+  {
+    title: "难度",
+    slotName: "difficulty",
+    align: "center",
   },
   {
     title: "创建时间",
     slotName: "createTime",
+    align: "center",
+    sortable: {
+      sortDirections: ["ascend", "descend"],
+    },
   },
   {
     slotName: "optional",
+    align: "center",
   },
 ];
 
@@ -163,7 +203,7 @@ const doSubmit = () => {
 
 <style scoped>
 #questionsView {
-  max-width: 1280px;
+  max-width: 95%;
   margin: 0 auto;
 }
 </style>

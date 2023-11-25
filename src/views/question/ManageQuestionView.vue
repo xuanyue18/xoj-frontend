@@ -3,13 +3,13 @@
     <a-row justify="space-between">
       <a-col flex="auto">
         <a-form :model="searchParams" layout="inline">
-          <a-form-item field="tags" label="标签:" style="min-width: 300px">
+          <a-form-item field="tags" label="标签:" style="min-width: 200px">
             <a-input-tag v-model="searchParams.tags" placeholder="请选择标签" />
           </a-form-item>
           <a-form-item label="难度:">
             <a-select
               v-model="searchParams.difficulty"
-              :style="{ width: '130px' }"
+              :style="{ width: '120px' }"
               placeholder="选择难度"
               allow-clear
             >
@@ -22,6 +22,7 @@
             <a-input-search
               v-model="searchParams.keyword"
               :style="{ width: '320px' }"
+              @change="doSubmit"
               @click="doSubmit"
               placeholder="请输入搜索关键词"
               search-button
@@ -38,7 +39,7 @@
         </a-button>
       </a-col>
     </a-row>
-
+    <a-divider size="0" />
     <a-table
       :ref="tableRef"
       :columns="columns"
@@ -107,7 +108,9 @@
       <template #acceptedRate="{ record }">
         {{
           `${
-            record.submitNum ? record.acceptedNum / record.submitNum : "0"
+            record.submitNum
+              ? ((record.acceptedNum / record.submitNum) * 100).toFixed(2)
+              : "0.00"
           }% (${record.acceptedNum}/${record.submitNum})`
         }}
       </template>
@@ -144,7 +147,7 @@ const searchParams = ref<QuestionQueryRequest>({
   keyword: undefined,
   difficulty: undefined,
   tags: [],
-  pageSize: 10,
+  pageSize: 8,
   current: 1,
   sortField: "createTime",
   sortOrder: "descend",
@@ -180,8 +183,6 @@ onMounted(() => {
   loadData();
 });
 
-// {id: "1", title: "A+ D", content: "新的题目内容", tags: "["二叉树"]", answer: "新的答案", submitNum: 0,…}
-
 const columns = [
   {
     title: "题目",
@@ -198,25 +199,25 @@ const columns = [
   {
     title: "标签",
     slotName: "tags",
-    width: 280,
+    width: 200,
     align: "center",
   },
   {
     title: "判题配置",
     slotName: "judgeConfig",
-    width: 280,
+    width: 300,
     align: "center",
   },
   {
     title: "判题用例",
     slotName: "judgeCase",
-    width: 300,
+    width: 240,
     align: "center",
   },
   {
     title: "通过率",
     slotName: "acceptedRate",
-    width: 120,
+    width: 140,
     align: "center",
   },
   {
@@ -278,5 +279,7 @@ const doSubmit = () => {
 
 <style scoped>
 #manageQuestionView {
+  max-width: 95%;
+  margin: 0 auto;
 }
 </style>
