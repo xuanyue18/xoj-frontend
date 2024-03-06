@@ -7,7 +7,7 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  document.title = "xoj-" + <string>to.name;
+  document.title = "Xcode OJ-" + <string>to.name;
   next();
 });
 

@@ -6,7 +6,7 @@ import { OpenAPI } from "../../generated";
 OpenAPI.WITH_CREDENTIALS = true;
 const baseUrl =
   process.env.NODE_ENV === "development"
-    ? "http://localhost:8121"
+    ? "http://localhost:8101"
     : "http://47.113.151.164";
 
 OpenAPI.BASE = baseUrl;

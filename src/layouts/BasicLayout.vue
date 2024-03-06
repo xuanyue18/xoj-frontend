@@ -8,9 +8,13 @@
         <router-view />
       </a-layout-content>
       <a-layout-footer class="footer">
-        <a href="https://github.com/xuanyue18" style="text-decoration: none"
-          >Xcode Online Judge by xuanyue18</a
+        <a
+          href="https://github.com/xuanyue18"
+          target="_blank"
+          rel="noopener noreferrer"
         >
+          Xcode Online Judge by xuanyue18
+        </a>
       </a-layout-footer>
     </a-layout>
   </div>

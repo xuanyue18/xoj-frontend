@@ -7,7 +7,7 @@
             <img src="../assets/xoj-logo.png" class="logo" />
           </a-link>
           <a-link @click="$router.push('/')" :hoverable="false">
-            <div class="title">XUANYUE OJ</div>
+            <div class="title">XCode OJ</div>
           </a-link>
         </a-space>
       </a-layout-header>
@@ -15,9 +15,13 @@
         <router-view />
       </a-layout-content>
       <a-layout-footer class="footer">
-        <a href="https://github.com/xuanyue18"
-          >Xcode Online Judge by xuanyue18</a
+        <a
+          href="https://github.com/xuanyue18"
+          target="_blank"
+          rel="noopener noreferrer"
         >
+          Xcode Online Judge by xuanyue18
+        </a>
       </a-layout-footer>
     </a-layout>
   </div>
