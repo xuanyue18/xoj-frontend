@@ -11,6 +11,7 @@ import QuestionSubmitView from "@/views/question/QuestionSubmitView.vue";
 import ViewQuestionsView from "@/views/question/ViewQuestionsView.vue";
 import AboutView from "@/views/AboutView.vue";
 import NoFound from "@/views/error/NoFoundView.vue";
+import HomeView from "@/views/HomeView.vue";
 
 export const routes: Array<RouteRecordRaw> = [
   {
@@ -36,7 +37,10 @@ export const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
     name: "主页",
-    component: QuestionsView,
+    component: HomeView,
+    meta: {
+      hideInMenu: true,
+    },
   },
   {
     path: "/questions",
